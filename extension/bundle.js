@@ -35071,6 +35071,11 @@
   function Title({ children }) {
     return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "item-title", children });
   }
+  var calculateTotalBaseStats = (stats) => {
+    return stats.reduce((sum, stat) => {
+      return Math.round(sum + stat.value * 100);
+    }, 0);
+  };
   var ratingColor = {
     1: "grey",
     2: "#36AE7C",
@@ -35099,21 +35104,37 @@
       return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Loading, {});
     }
     return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(import_jsx_runtime6.Fragment, { children: store.personal.sort((a, b) => {
-      if (b.description.overrides.rarity === a.description.overrides.rarity) {
-        return b.description.overrides.itemLevel - a.description.overrides.itemLevel;
+      const {
+        base_stats: a_base_stats,
+        rarity: a_rarity
+      } = a.description.overrides;
+      const {
+        base_stats: b_base_stats,
+        rarity: b_rarity
+      } = b.description.overrides;
+      if (a_base_stats && b_base_stats) {
+        const total_a_stats = calculateTotalBaseStats(a_base_stats);
+        const total_b_stats = calculateTotalBaseStats(b_base_stats);
+        return total_b_stats - total_a_stats;
       }
-      return b.description.overrides.rarity - a.description.overrides.rarity;
+      return b_rarity - a_rarity;
     }).map((offer) => {
+      const {
+        itemLevel,
+        rarity,
+        base_stats,
+        perks
+      } = offer.description.overrides;
       return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "MuiBox-root css-178yklu", children: [
         /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Title, { children: localisation_default[offer.description.id].display_name }),
         offer.state === "completed" ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: "Owned" }) : null,
         /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { style: { display: "flex" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "info-items", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "info-item", style: { color: ratingColor[offer.description.overrides.rarity] }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "info-item", style: { color: ratingColor[rarity] }, children: [
               /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("img", { src: rating_default, style: {} }),
               /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
                 /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: "Rating" }),
-                offer.description.overrides.itemLevel
+                itemLevel
               ] })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "info-item", children: [
@@ -35125,7 +35146,7 @@
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { style: { flex: 1 }, children: [
-            offer.description.overrides.base_stats ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "row", children: [
+            base_stats ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "row", children: [
               /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { style: {
                 display: "flex",
                 alignItems: "center",
@@ -35134,12 +35155,10 @@
                 /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { style: {}, children: "Modifiers" }),
                 /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { style: { display: "flex", alignItems: "center" }, children: [
                   /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("img", { src: rating_default, style: { height: "1em" } }),
-                  offer.description.overrides.base_stats?.reduce((sum, stat) => {
-                    return Math.round(sum + stat.value * 100);
-                  }, 0)
+                  calculateTotalBaseStats(base_stats)
                 ] })
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "stats", children: offer.description.overrides.base_stats?.map((stat) => {
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "stats", children: base_stats?.map((stat) => {
                 return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "stat", children: [
                   /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: localisation_default[stat.name] }),
                   /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "stat-bar-row", children: [
@@ -35157,7 +35176,7 @@
                 ] }, stat.name);
               }) })
             ] }) : null,
-            offer.description.overrides.perks.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "row", children: [
+            perks.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "row", children: [
               /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { style: {
                 display: "flex",
                 alignItems: "center",

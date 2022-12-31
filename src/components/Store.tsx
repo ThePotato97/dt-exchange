@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { credits, rating } from "../icons"
 import { Loading } from "./Loading"
 import { Text } from "./Text"
-import type { Character } from "../types"
+import type { BaseStat, Character } from "../types"
 import { useMasterList } from "../hooks/useMasterList"
 import { useStore } from "../hooks/useStore"
 import localisation from "../localisation.json"
@@ -14,6 +14,12 @@ function Divider() {
 
 function Title({ children }: { children: ReactNode }) {
 	return <div className="item-title">{children}</div>
+}
+
+const calculateTotalBaseStats = (stats: BaseStat[] ) => {
+	return stats.reduce((sum, stat) => {
+		return Math.round(sum + (stat.value * 100))
+	}, 0)
 }
 
 const ratingColor = {
@@ -52,19 +58,32 @@ export function Store({ character }: { character?: Character }) {
 		<>
 			{store.personal
 				.sort((a, b) => {
-					if (
-						b.description.overrides.rarity === a.description.overrides.rarity
-					) {
-						return (
-							b.description.overrides.itemLevel -
-							a.description.overrides.itemLevel
-						)
+					const {
+						base_stats: a_base_stats,
+						rarity: a_rarity
+					} = a.description.overrides;
+					const {
+						base_stats: b_base_stats,
+						rarity: b_rarity
+					} = b.description.overrides;
+
+					if ( a_base_stats && b_base_stats) {
+						
+						const total_a_stats = calculateTotalBaseStats(a_base_stats)
+						const total_b_stats = calculateTotalBaseStats(b_base_stats)
+						return total_b_stats - total_a_stats
 					}
-					return b.description.overrides.rarity - a.description.overrides.rarity
+					return b_rarity - a_rarity
 				})
 				.map((offer) => {
 					// console.log(offer)
-
+					const {
+						itemLevel,
+						rarity,
+						base_stats,
+						perks,
+					} = offer.description.overrides
+					
 					return (
 						<div className="MuiBox-root css-178yklu" key={offer.offerId}>
 							<Title>{localisation[offer.description.id].display_name}</Title>
@@ -82,11 +101,11 @@ export function Store({ character }: { character?: Character }) {
 
 							<div style={{ display: "flex" }}>
 								<div className="info-items">
-									<div className="info-item" style={{ color: ratingColor[offer.description.overrides.rarity] }}>
+									<div className="info-item" style={{ color: ratingColor[rarity] }}>
 										<img src={rating} style={{}} />
 										<div>
 											<Text>Rating</Text>
-											{offer.description.overrides.itemLevel}
+											{itemLevel}
 										</div>
 									</div>
 									<div className="info-item">
@@ -99,7 +118,7 @@ export function Store({ character }: { character?: Character }) {
 								</div>
 
 								<div style={{ flex: 1 }}>
-									{offer.description.overrides.base_stats ? (<div className="row">
+									{base_stats ? (<div className="row">
 										<div style={{
 											display: 'flex', alignItems: 'center',
 											justifyContent: 'space-between'
@@ -107,13 +126,11 @@ export function Store({ character }: { character?: Character }) {
 											<span style={{}}>Modifiers</span>
 											<div style={{ display: 'flex', alignItems: 'center' }}>
 												<img src={rating} style={{ height: '1em' }} />
-												{offer.description.overrides.base_stats?.reduce((sum, stat) => {
-													return Math.round(sum + (stat.value * 100))
-												}, 0)}
+												{calculateTotalBaseStats(base_stats)}
 											</div>
 										</div>
 										<div className="stats">
-											{offer.description.overrides.base_stats?.map((stat) => {
+											{base_stats?.map((stat) => {
 												return (
 													<div className="stat" key={stat.name}>
 														<Text>{localisation[stat.name]}</Text>
@@ -134,7 +151,7 @@ export function Store({ character }: { character?: Character }) {
 										</div>
 									</div>) : null}
 
-									{offer.description.overrides.perks.length > 0 ? (
+									{perks.length > 0 ? (
 										<div className="row">
 											<div style={{
 												display: 'flex', alignItems: 'center',
